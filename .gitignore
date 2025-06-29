@@ -1,0 +1,12 @@
+# ipynb files
+*.ipynb
+*.log
+# test files, experimental data
+tmp/
+ExpData/
+Plot/
+__pycache__/
+DataForTrain/
+Pictures/
+*.ipynb_checkpoints
+tmp_trash/
