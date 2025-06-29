@@ -8,5 +8,5 @@ Plot/
 __pycache__/
 DataForTrain/
 Pictures/
-*.ipynb_checkpoints
+.ipynb_checkpoints/
 tmp_trash/
