@@ -8,7 +8,9 @@ import numpy as np
 from sklearn.metrics import mean_squared_error
 from Model.esn import ESN
 from pyswarms.single import GlobalBestPSO
-
+'''PSO visualize'''
+from pyswarms.utils.plotters import plot_contour
+from pyswarms.utils.plotters.formatters import Mesher
 '''handle the data'''
 from Scripts.DataHandle import get_sample_ids, generate_data_sets
 import pickle
@@ -53,15 +55,27 @@ def optimize_esn_with_pso(train_set, val_set, limb_str):
     val_targets = val_set[:, out_start:out_end]
 
     # Define hyperparameter bounds: reservoir_size, sr, sparsity, leak_rate
+    # bounds 1
+    # bounds = (
+    #     [60,  0.8,  0.1, 0.3],   # min values
+    #     [160, 0.95, 0.4, 0.9]    # max values
+    # )
+    # bounds 2
     bounds = (
-        [60,  0.8,  0.1, 0.3],   # min values
-        [160, 0.95, 0.4, 0.9]    # max values
+        [10,  0.1,  0.1, 0.1],   # min values
+        [160, 0.95, 0.9, 0.9]    # max values
     )
-
     optimizer = GlobalBestPSO(
         n_particles=20,
         dimensions=4,
+        # option 1
         options={'c1': 1.5, 'c2': 1.5, 'w': 0.5},
+        # option 2
+        # options = {
+        # 'c1': 2.0,      # personal cognitive
+        # 'c2': 2.0,      # social/global
+        # 'w': 0.9        # initial inertia; will decrease manually
+        # },
         bounds=bounds
     )
 
@@ -73,8 +87,36 @@ def optimize_esn_with_pso(train_set, val_set, limb_str):
         val_inputs=val_inputs,
         val_targets=val_targets
     )
+    '''Visualize the optimization process'''
+    cost_hist = optimizer.cost_history
 
-    return best_cost, best_pos
+
+    # 1) Retrieve full swarm positions history
+    pos_hist = optimizer.pos_history  # ⇒ (n_iters, n_particles, dims)
+
+    best_pos_history = []
+
+    # 2) Loop through each iteration
+    for positions_i in pos_hist:
+        # 2a) Compute cost for all particles at this iteration
+        costs_i = pso_objective_function(
+            positions_i,
+            train_inputs, train_targets,
+            val_inputs, val_targets
+        )
+        # 3) Find best particle index
+        best_idx = np.argmin(costs_i)
+        # 4) Record its position
+        best_pos_history.append(positions_i[best_idx].copy())
+
+    # Convert to array: shape (n_iters, dims)
+    best_pos_history = np.vstack(best_pos_history)
+
+    return best_cost, best_pos, cost_hist, best_pos_history
+
+
+
+
 
 def pso_objective_function(particles, train_inputs, train_targets, val_inputs, val_targets):
     results = []
@@ -110,16 +152,21 @@ def pso_objective_function(particles, train_inputs, train_targets, val_inputs, v
 
     return np.array(results)
 
-def esn_train(data_path):
+def esn_train(data_path, model_name):
     data_for_train = np.load(data_path)
     sample_id = get_sample_ids()
     # Take the example of RH training
     '''Get the train, val, test set of the data'''
     train_set, val_set, test_set =generate_data_sets(sample_id, data_for_train)
+    '''save the test_set for further plot'''
+    # np.save('../DataForTrain/data_for_test.npy',test_set)
     '''Optimize the ESN with PSO'''
-    LH_best_cost, LH_best_pos = optimize_esn_with_pso(train_set, val_set, 'RH')
+    optimal_param = optimize_esn_with_pso(train_set, val_set, model_name)
+    # tmp return for plot
+    return optimal_param
+    # return optimal_param
     '''Test and save optimal ESN'''
-    esn_best, grf_predicted = train_and_predict_esn(LH_best_pos, 'RH', train_set, test_set)
+    # esn_best, grf_predicted = train_and_predict_esn(LH_best_pos, model_name, train_set, test_set)
     # save_esn_model(esn_best,'./Model/esn_RH.pkl')
 
 def train_and_predict_esn(best_pos, limb_str, train_set, test_set):
@@ -185,6 +232,10 @@ def train_and_predict_esn(best_pos, limb_str, train_set, test_set):
 
     return final_esn, grf_predicted
 
+
+
+
+
 def save_esn_model(esn_model, save_path):
     """
     Save the ESN model to a file using pickle.
@@ -200,4 +251,4 @@ def save_esn_model(esn_model, save_path):
 
 if __name__ == '__main__':
     data_path = './DataForTrain/data_for_train.npy'
-    esn_train(data_path)
+    esn_train(data_path,'RH')

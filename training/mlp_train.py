@@ -12,7 +12,7 @@ from Model.esn import ESN,load_esn_models
 from Model.mlp import MLP
 '''handle the data'''
 from Scripts.DataHandle import split_by_half_period, reshape_to_samples
-
+from Scripts.forceplot import plot_force_sensors
 
 def process_segments(models, data, period):
     """
@@ -53,23 +53,24 @@ def mlp_train(data_path, model_path=None):
     data_for_train = np.load(data_path)
     esn_rf, esn_lf, esn_lh, esn_rh = load_esn_models('./Model/LearnedModel')
 
-
+    print(data_for_train[90:data_for_train.shape[0]-50,:].shape[0]/period)
     models = [
     ("rf", esn_rf, (16, 20), (32, 34)),
     ("lf", esn_lf, (20, 24), (34, 36)),
     ("lh", esn_lh, (24, 28), (36, 38)),
     ("rh", esn_rh, (28, 32), (38, 40)),]
+    # plot the data target 
+    # plot_force_sensors(data_for_train[90:period*5-50,32:40])
+    mlp_data = process_segments(models, data_for_train[90:data_for_train.shape[0]-50,:], period)
 
-    mlp_data = process_segments(models, data_for_train, period)
     mlp_data_dic = reshape_all(mlp_data)
 
-    model = train_best_mlp_model(mlp_data_dic['rf']['in_y'], mlp_data_dic['rf']['out_y'],  model_class=MLP)
+    model = train_best_mlp_model(mlp_data_dic['rh']['in_y'], mlp_data_dic['rh']['out_y'],  model_class=MLP)
 
  
 
     # Save the model state_dict
     if model_path is not None:
-        os.makedirs(os.path.dirname(model_path), exist_ok=True)
         torch.save(model.state_dict(), model_path)
         print(f"Saved best model to {model_path}")
     
@@ -164,4 +165,5 @@ def train_best_mlp_model(in_array, out_array,  model_class, batch_size=16, lr=0.
 
 if __name__ == '__main__':
     data_path = './DataForTrain/data_for_train.npy'
-    mlp_train(data_path)
+    model_path = "./Model/MLP_RH_Y.pth"
+    mlp_train(data_path, model_path)

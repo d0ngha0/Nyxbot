@@ -3,12 +3,23 @@ import numpy as np
 import os
 
 
-'''读取并返回文件夹中的数据'''
 def get_data_in_directory(path):
+    """
+    Load and transpose all .npy files directly under `path`,
+    printing out each filename and the index it occupies in `data`.
+    """
     data = []
     for file_name in os.listdir(path):
         file_path = os.path.join(path, file_name)
-        
-        # 这里注意需要把读入的数据进行翻转
-        data.append(np.load(file_path).T)
+
+        # Skip directories and non-.npy files
+        if not os.path.isfile(file_path) or not file_name.lower().endswith('.npy'):
+            continue
+
+        arr = np.load(file_path).T
+        data.append(arr)
+
+        # Print filename and its index in the data list
+        print(f"Loaded '{file_name}' into data[{len(data)-1}]")
+
     return data

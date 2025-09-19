@@ -1,7 +1,7 @@
 import numpy as np
 import pickle
 
-def load_esn_models(model_dir='./Model'):
+def load_esn_models(model_dir='../Model/LearnedModel'):
     model_names = ['RF', 'LF', 'LH', 'RH']
     esn_models = {}
 

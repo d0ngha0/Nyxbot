@@ -45,7 +45,7 @@ def compute_segment_means(data):
 def reshape_to_samples(data, sample_length=70):
     n = len(data)
     num_samples = n // sample_length  # Number of complete samples
-    trimmed_data = data[:num_samples * sample_length]
+    trimmed_data = data[:num_samples * sample_length].copy()
     reshaped = trimmed_data.reshape((num_samples, sample_length))
     return reshaped
 
@@ -209,6 +209,70 @@ def shuffle_data(data, period=140, seed=42):
     np.random.shuffle(select_id_normal)
     return generate_data_set(select_id_normal, data)
 
+def abs_sum_by_period(arr: np.ndarray, period: int) -> np.ndarray:
+    
+    """
+    Compute the sum of absolute values for each consecutive period.
+    
+    Args:
+      arr (np.ndarray): 1D array of shape (n * period, )
+      period (int): length of each period
+    
+    Returns:
+      np.ndarray: 1D array of length n where each element is the
+                  sum of abs values over one period.
+    """
+    if arr.ndim != 1:
+        raise ValueError("Input array must be 1D")
+    if arr.size % period != 0:
+        raise ValueError("Array length must be a multiple of period")
+    
+    # reshape into (n_periods, period)
+    reshaped = arr.reshape(-1, period)
+    # take absolute values
+    abs_vals = np.abs(reshaped)  # using np.abs :contentReference[oaicite:1]{index=1}
+    # sum along axis=1 to get per-period sums
+    sums = abs_vals.sum(axis=1)   # using np.sum :contentReference[oaicite:2]{index=2}
+    return sums
+
+def fill_imu_zeros(data: np.ndarray) -> np.ndarray:
+    """
+    Replace zeros in a 1D IMU signal with adjacent non-zero values.
+    
+    Rules:
+      1. Leading zeros (before the first non-zero) are replaced by the first non-zero.
+      2. Zeros between two non-zeros are replaced by the last seen non-zero (forward fill).
+      3. If the entire array is zero, it is returned unchanged.
+    
+    Args:
+      data: 1D numpy array of IMU readings, shape (n,)
+    
+    Returns:
+      A new 1D array with zeros substituted.
+    """
+    res = data.copy()
+    # find indices of non-zero samples
+    nz = np.nonzero(res)[0]  # :contentReference[oaicite:0]{index=0}
+    if nz.size == 0:
+        # all values are zero → nothing to fill
+        return res
+
+    # 1) Back-fill leading zeros
+    first_nz = nz[0]
+    if first_nz > 0:
+        res[:first_nz] = res[first_nz]
+
+    # 2) Forward-fill intermediate zeros
+    for idx in nz:
+        # find next non-zero index, if any
+        # slicing until next non-zero
+        next_positions = nz[nz > idx]
+        next_nz = next_positions[0] if next_positions.size else None
+        end = next_nz if next_nz is not None else len(res)
+        # fill zeros between idx and end
+        res[idx+1 : end] = res[idx]
+
+    return res
 
 def generate_data_set(train_id, data_for_train, period=140):
     train_set = []

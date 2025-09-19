@@ -10,3 +10,7 @@ DataForTrain/
 Pictures/
 .ipynb_checkpoints/
 tmp_trash/
+ad_loc_test1.py
+ForceSensor/
+Kinematics/
+Scripts/forceplot.py
