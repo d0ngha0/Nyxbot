@@ -1,8 +1,8 @@
-# LegControl_v4(ESN) - Quadruped Robot Leg Control with Echo State Networks
+# Adhesion nerual controller for gecko-inspired robot 
 
 ## Overview
 
-This project implements a hybrid neural network approach for climbing robot adhesive control using Echo State Networks (ESN) and Multi-Layer Perceptrons (MLP). The system focuses on Ground Reaction adhesion (GRA) prediction and adaptive locomotion control for four-legged robots.
+This project implements a hybrid neural network approach for climbing robot adhesive control using Echo State Networks (ESN) and Multi-Layer Perceptrons (MLP). The system focuses on Ground Reaction adhesion (GRA) prediction and adaptive locomotion control for gecko-inspired climbing robots.
 
 ## Project Structure
 
