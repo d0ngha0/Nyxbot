@@ -32,21 +32,16 @@ LegControl_v4(ESN)/
 - **Multi-limb Support**: Separate models for each limb (RF, LF, LH, RH - Right Front, Left Front, Left Hind, Right Hind)
 - **Ground Reaction Adhesion Prediction**: Predicts GRA in Y and Z directions
 
-### 2. Central Pattern Generator (CPG)
-- **Biomimetic Control**: Generates rhythmic patterns similar to biological neural circuits
-- **Adaptive Parameters**: Time-varying frequency control through `mi_schedule`
-- **2D Output**: Generates coordinated oscillations for locomotion control
-
-### 3. Multi-Layer Perceptron (MLP)
+### 2. Multi-Layer Perceptron (MLP)
 - **Prediction Network**: Complements ESN for improved accuracy
 - **PyTorch Implementation**: Flexible neural network with configurable layers
 - **Model Loading**: Utilities for loading pre-trained models by limb and axis
 
-### 4. Data Processing Pipeline
-- **Normalization**: MinMaxScaler with feature range (-1, 1)
-- **Segmentation**: Handles periodic data with configurable period length (default: 140 steps)
-- **Train/Val/Test Split**: 80/10/10 split with shuffling
-- **Missing Data Handling**: Zero-filling algorithms for IMU data
+### 3. Central Pattern Generator (CPG)
+- **Biomimetic Control**: Generates rhythmic patterns similar to biological neural circuits
+- **Adaptive Parameters**: Time-varying frequency control through `mi_schedule`
+- **2D Output**: Generates coordinated oscillations for locomotion control
+
 
 ## Installation
 
@@ -67,6 +62,18 @@ pip install joblib
 4. Place training data in `DataForTrain/` directory
 
 ## Usage
+### Data Preprocessing
+```python
+from Scripts.DataHandle import normalize_data, get_sample_ids, generate_data_sets
+
+# Load and normalize data
+data = np.load('data_for_train.npy')
+normalized_data = normalize_data(data, save_scaler='./Model/')
+
+# Generate train/val/test splits
+sample_ids = get_sample_ids()
+train_set, val_set, test_set = generate_data_sets(sample_ids, normalized_data)
+```
 
 ### Training ESN Models
 ```python
@@ -99,18 +106,6 @@ model_tags = ["RF_Z", "RF_Y", "LF_Z", "LF_Y", "LH_Z", "LH_Y", "RH_Z", "RH_Y"]
 mlp_models = load_named_models(MLP, model_tags, "./Model/LearnedModel/")
 ```
 
-### Data Preprocessing
-```python
-from Scripts.DataHandle import normalize_data, get_sample_ids, generate_data_sets
-
-# Load and normalize data
-data = np.load('data_for_train.npy')
-normalized_data = normalize_data(data, save_scaler='./Model/')
-
-# Generate train/val/test splits
-sample_ids = get_sample_ids()
-train_set, val_set, test_set = generate_data_sets(sample_ids, normalized_data)
-```
 
 ## Model Architecture
 
