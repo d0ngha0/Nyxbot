@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project implements a hybrid neural network approach for quadruped robot leg control using Echo State Networks (ESN) and Multi-Layer Perceptrons (MLP). The system focuses on Ground Reaction Force (GRF) prediction and adaptive locomotion control for four-legged robots.
+This project implements a hybrid neural network approach for climbing robot adhesive control using Echo State Networks (ESN) and Multi-Layer Perceptrons (MLP). The system focuses on Ground Reaction adhesion (GRA) prediction and adaptive locomotion control for four-legged robots.
 
 ## Project Structure
 
@@ -30,7 +30,7 @@ LegControl_v4(ESN)/
 - **Reservoir Computing**: Implements ESN with configurable reservoir size, spectral radius, sparsity, and leak rate
 - **PSO Optimization**: Uses Particle Swarm Optimization to find optimal hyperparameters
 - **Multi-limb Support**: Separate models for each limb (RF, LF, LH, RH - Right Front, Left Front, Left Hind, Right Hind)
-- **Ground Reaction Force Prediction**: Predicts GRF in Y and Z directions
+- **Ground Reaction Adhesion Prediction**: Predicts GRA in Y and Z directions
 
 ### 2. Central Pattern Generator (CPG)
 - **Biomimetic Control**: Generates rhythmic patterns similar to biological neural circuits
@@ -140,11 +140,7 @@ train_set, val_set, test_set = generate_data_sets(sample_ids, normalized_data)
 - **Columns 16-31**: Joint velocities for 4 limbs
 - **Columns 32-39**: Ground Reaction Forces (GRF_Y, GRF_Z for each limb)
 
-### Limb Indexing
-- **RF (Right Front)**: Inputs [16:20], Targets [32:34]
-- **LF (Left Front)**: Inputs [20:24], Targets [34:36]
-- **LH (Left Hind)**: Inputs [24:28], Targets [36:38]
-- **RH (Right Hind)**: Inputs [28:32], Targets [38:40]
+
 
 ## Training Process
 
@@ -162,22 +158,8 @@ train_set, val_set, test_set = generate_data_sets(sample_ids, normalized_data)
 
 ## Applications
 
-- **Quadruped Robot Control**: Real-time locomotion control
+- **Adhesive locomotion Control**: Real-time adhesive locomotion control
 - **Gait Adaptation**: Adaptive walking patterns
-- **Force Prediction**: Ground reaction force estimation
+- **Force Prediction**: Ground reaction Adhesion estimation
 - **Fault Detection**: Limb malfunction detection through prediction errors
 
-## Contributing
-
-1. Follow PEP 8 style guidelines
-2. Add unit tests for new features
-3. Update documentation for API changes
-4. Ensure backward compatibility
-
-## License
-
-This project is part of the Nyxbot research initiative for quadruped robotics.
-
-## Contact
-
-For questions or collaborations, please refer to the repository maintainer.
