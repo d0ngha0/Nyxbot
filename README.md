@@ -22,7 +22,7 @@ Nyxbot adhesion controller/
 └── Scripts/               # Utility scripts
     ├── DataHandle.py      # Data preprocessing and handling
     └── filehandle.py      # File I/O operations
-
+```
 
 
 ## Key Features
