@@ -9,8 +9,8 @@ from sklearn.metrics import mean_squared_error
 from Model.esn import ESN
 from pyswarms.single import GlobalBestPSO
 '''PSO visualize'''
-from pyswarms.utils.plotters import plot_contour
-from pyswarms.utils.plotters.formatters import Mesher
+# from pyswarms.utils.plotters import plot_contour
+# from pyswarms.utils.plotters.formatters import Mesher
 '''handle the data'''
 from Scripts.DataHandle import get_sample_ids, generate_data_sets
 import pickle
@@ -90,7 +90,6 @@ def optimize_esn_with_pso(train_set, val_set, limb_str):
     '''Visualize the optimization process'''
     cost_hist = optimizer.cost_history
 
-
     # 1) Retrieve full swarm positions history
     pos_hist = optimizer.pos_history  # ⇒ (n_iters, n_particles, dims)
 
@@ -113,10 +112,6 @@ def optimize_esn_with_pso(train_set, val_set, limb_str):
     best_pos_history = np.vstack(best_pos_history)
 
     return best_cost, best_pos, cost_hist, best_pos_history
-
-
-
-
 
 def pso_objective_function(particles, train_inputs, train_targets, val_inputs, val_targets):
     results = []
@@ -158,18 +153,12 @@ def esn_train(data_path, model_name):
     # Take the example of RH training
     '''Get the train, val, test set of the data'''
     train_set, val_set, test_set =generate_data_sets(sample_id, data_for_train)
-    '''save the test_set for further plot'''
-    # np.save('../DataForTrain/data_for_test.npy',test_set)
     '''Optimize the ESN with PSO'''
     optimal_param = optimize_esn_with_pso(train_set, val_set, model_name)
-    # tmp return for plot
-    return optimal_param
     # return optimal_param
-    '''Test and save optimal ESN'''
-    # esn_best, grf_predicted = train_and_predict_esn(LH_best_pos, model_name, train_set, test_set)
-    # save_esn_model(esn_best,'./Model/esn_RH.pkl')
-
-def train_and_predict_esn(best_pos, limb_str, train_set, test_set):
+    return optimal_param
+    
+def esn_train_and_predict(best_pos, limb_str, train_set, test_set):
     """
     Train ESN using best PSO parameters and predict GRF on test set.
 
@@ -232,10 +221,6 @@ def train_and_predict_esn(best_pos, limb_str, train_set, test_set):
 
     return final_esn, grf_predicted
 
-
-
-
-
 def save_esn_model(esn_model, save_path):
     """
     Save the ESN model to a file using pickle.
@@ -250,5 +235,22 @@ def save_esn_model(esn_model, save_path):
 
 
 if __name__ == '__main__':
+    """
+    Data format requirements for training:
+    
+    The data_for_train.npy file should contain a 2D array where:
+    - Inputs (Joint Torques):
+        RF (Right Front): columns 16-20
+        LF (Left Front):  columns 20-24
+        LH (Left Hind):   columns 24-28
+        RH (Right Hind):  columns 28-32
+    
+    - Targets (Ground Reaction Forces - GRFs):
+        RF (Right Front): columns 32-34
+        LF (Left Front):  columns 34-36
+        LH (Left Hind):   columns 36-38
+        RH (Right Hind):  columns 38-40
+    """
+    # Replace data_path with your own data file path following the format specified above
     data_path = './DataForTrain/data_for_train.npy'
     esn_train(data_path,'RH')

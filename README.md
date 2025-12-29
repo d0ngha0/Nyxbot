@@ -2,12 +2,14 @@
 
 ## Overview
 
-This project implements a hybrid neural network approach for climbing robot adhesive control using Echo State Networks (ESN) and Multi-Layer Perceptrons (MLP). The system focuses on Ground Reaction adhesion (GRA) prediction and adaptive locomotion control for gecko-inspired climbing robots.
+This project introduces a neural adhesion controller to improve the stability of gecko‐inspired climbing robots. By integrating an echo state network and a multilayer perceptron, the system utilizes joint torque feedback to accurately estimate adhesion in both normal and shear directions and predict slips. This enables effective recovery from slip events, ensuring robust locomotion on challenging, low‐adhesion terrains.
+
+![System Overview](./neural_controller.png)
 
 ## Project Structure
 
 ```
-LegControl_v4(ESN)/
+Nyxbot adhesion controller/
 ├── Model/                  # Neural network models
 │   ├── cpg.py             # Central Pattern Generator implementation
 │   ├── esn.py             # Echo State Network model
@@ -19,10 +21,9 @@ LegControl_v4(ESN)/
 │   └── mlp_train.py       # MLP training pipeline
 └── Scripts/               # Utility scripts
     ├── DataHandle.py      # Data preprocessing and handling
-    ├── DataWashing.py     # Data cleaning utilities
-    ├── filehandle.py      # File I/O operations
-    └── ForceMapping.py    # Force sensor data mapping
-```
+    └── filehandle.py      # File I/O operations
+
+
 
 ## Key Features
 
@@ -39,7 +40,7 @@ LegControl_v4(ESN)/
 
 ### 3. Central Pattern Generator (CPG)
 - **Biomimetic Control**: Generates rhythmic patterns similar to biological neural circuits
-- **Adaptive Parameters**: Time-varying frequency control through `mi_schedule`
+- **Adaptive Parameters**: Time-varying frequency control through `MI`
 - **2D Output**: Generates coordinated oscillations for locomotion control
 
 
@@ -67,6 +68,30 @@ pip install joblib
 from Scripts.DataHandle import normalize_data, get_sample_ids, generate_data_sets
 
 # Load and normalize data
+"""
+    Data format requirements for training:
+    
+    The data_for_train.npy file should contain a 2D array with 40 columns where:
+    
+    - Joint Positions (columns 0-16):
+        RF (Right Front): columns 0-4
+        LF (Left Front):  columns 4-8
+        LH (Left Hind):   columns 8-12
+        RH (Right Hind):  columns 12-16
+    
+    - Joint Torques (columns 16-32):
+        RF (Right Front): columns 16-20
+        LF (Left Front):  columns 20-24
+        LH (Left Hind):   columns 24-28
+        RH (Right Hind):  columns 28-32
+    
+    - Ground Reaction Forces - GRFs (columns 32-40):
+        RF (Right Front): columns 32-34
+        LF (Left Front):  columns 34-36
+        LH (Left Hind):   columns 36-38
+        RH (Right Hind):  columns 38-40
+ """
+# Replace data_path with your own data file path following the format specified above
 data = np.load('data_for_train.npy')
 normalized_data = normalize_data(data, save_scaler='./Model/')
 
@@ -82,15 +107,6 @@ from training.esn_train import esn_train
 # Train ESN for a specific limb
 data_path = './DataForTrain/data_for_train.npy'
 optimal_params = esn_train(data_path, 'RH')  # Train for Right Hind limb
-```
-
-### Using CPG for Pattern Generation
-```python
-from Model.cpg import generate_cpg_output
-
-# Generate CPG output with time-varying frequency
-mi_schedule = [(0, 50, 2.5), (50, 100, 3.0)]  # (start, end, frequency)
-cpg_output = generate_cpg_output(140, mi_schedule)
 ```
 
 ### Loading Pre-trained Models
@@ -122,39 +138,19 @@ mlp_models = load_named_models(MLP, model_tags, "./Model/LearnedModel/")
 - **Output Size**: 70 (prediction for second half of period)
 - **Activation**: ReLU activation
 
-### Central Pattern Generator
-- **Dynamics**: 2D oscillator with rotation matrix
-- **Output**: Coordinated rhythmic patterns
-- **Control**: Frequency modulation through rotation angle
-
-## Data Format
-
-### Input Data Structure
-- **Shape**: (N × 140, 40) where N is number of cycles
-- **Columns 0-15**: Joint angles for 4 limbs (4 joints each)
-- **Columns 16-31**: Joint velocities for 4 limbs
-- **Columns 32-39**: Ground Reaction Forces (GRF_Y, GRF_Z for each limb)
-
-
 
 ## Training Process
 
 1. **Data Preparation**: Load, normalize, and split data
-2. **PSO Optimization**: Find optimal ESN hyperparameters
-3. **Model Training**: Train ESN with optimal parameters
+2. **ESN Training**: Find optimal ESN hyperparameters
+3. **MLP Training**: Find optimal MLP hyperparameters
 4. **Validation**: Evaluate on validation set
 5. **Model Saving**: Save trained models for deployment
 
-## Performance Metrics
-
-- **MSE (Mean Squared Error)**: Primary optimization metric
-- **Weighted MSE**: Custom weighting for Y and Z components
-- **Validation Error**: Used for hyperparameter selection
 
 ## Applications
 
 - **Adhesive locomotion Control**: Real-time adhesive locomotion control
-- **Gait Adaptation**: Adaptive walking patterns
 - **Force Prediction**: Ground reaction Adhesion estimation
-- **Fault Detection**: Limb malfunction detection through prediction errors
+
 
