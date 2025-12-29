@@ -100,13 +100,15 @@ sample_ids = get_sample_ids()
 train_set, val_set, test_set = generate_data_sets(sample_ids, normalized_data)
 ```
 
-### Training ESN Models
+### Training ESN and MLP Models
 ```python
 from training.esn_train import esn_train
 
-# Train ESN for a specific limb
+# Train ESN 
 data_path = './DataForTrain/data_for_train.npy'
-optimal_params = esn_train(data_path, 'RH')  # Train for Right Hind limb
+esn_train(data_path, 'RH') 
+# Train MLP 
+mlp_train(data_path, model_path)
 ```
 
 ### Loading Pre-trained Models
