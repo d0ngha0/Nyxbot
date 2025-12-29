@@ -1,6 +1,7 @@
 # ipynb files
 *.ipynb
-*.log
+*.
+.vscode/
 # test files, experimental data
 tmp/
 ExpData/
